@@ -10,13 +10,13 @@ But ultime de toute architecture applicative : isoler le code "métier" dans cha
 
 ### Revue de code
 
-Egoless programming
+Ego-less programming
 
 Conventions d'équipe pour éviter de débattre de l'utilisation d'un nommage / pattern
 
 Rôles : auteur, modérateur, scribe, reviewer, manager
 
-à l'issue de la revue, c'est l'auteur qui corrige le code
+À l'issue de la revue, c'est l'auteur qui corrige le code
 
 Bonnes dimensions pour une revue : entre 200 et 400 lignes de code
 
@@ -24,7 +24,7 @@ Checklist de revue de code : what should we put inside ? (*TO BE COMPLETED*)
 
 ### Dette technique
 
-*TO BE COMPLETED*
+Concessions faites sur les standards de qualité de l'équipe lors du développement d'une feature, qu'il faudra "rembourser" plus tard car elles détériorent la maintenabilité du code
 
 ## Tester son code
 
@@ -50,14 +50,19 @@ assertThat(multiply(1, 1)).isEqualTo(1)
 
 ### Mock/Stub
 
-- Stub override directement une classe qui contient des dépendances dont on veut s'isoler pour le test (dans notre implem)
+- Stub override directement une classe qui contient des dépendances dont on veut s'isoler pour le test, en définissant des retours "en dur"
 - Mock est une lib qui permet de juste spécifier la valeur retournée par l'objet dans le contexte sans avoir à override / rajouter du code pour spécifier le comportement
 
 Stubs largement abandonnés en faveur des mocks aujourd'hui
 
 ### Test-driven development
 
-*TO BE COMPLETED*
+Méthode de développement de features qui consiste à décrire l'intention dans un test avant de démarrer l'implémentation.
+
+Cycle TDD
+- RED : le test doit décrire le comportement souhaité, être lancé et échouer (être rouge dans la plupart des IDE)
+- GREEN : on fait passer le test au vert avec l'implémentation la plus simpliste possible (KISS)
+- REFACTOR : on refactorise le code de test (nom, méthodes utilitaires), puis l'implémentation si besoin
 
 ### Mutation testing 
 
@@ -126,11 +131,23 @@ Le code appelant ne doit pas dépendre de méthodes qu'il n'utilise pas.
 
 Avoir une interface avec trop de méthodes est un bad smell de design.
 
+**Exemple de violation**
+
+
+
 #### D : Dependency inversion principle
 
 Des classes / modules de de haut niveau d'abstraction ne doivent pas dépendre de modules de plus bas niveau. Les deux doivent être dépendants d'une interface qui les relie.
 
 Les abstractions ne sont pas censées être dépendantes de détails d'implémentation. Ce sont les implémentations qui doivent dépendre des abstractions.
+
+**Exemple de violation**
+
+On dispose d'une base de données pour stocker les livres disponibles à la location. On souhaite exposer un endpoint pour accéder à ces livres. Pour cela, on dispose d'une classe `SqlBookRepository` qui vient requêter la base de données mise en place via un ORM. En supposant que la requête `GET /books` sollicite un `BookService`, avec une méthode `findAllBooks()`, on crée une dépendance forte entre des règles applicatives (`BookService`) et l'infrastructure externe de persistance (`SqlBookRepository`).
+
+Le jour où l'on décide non plus de changer de moyen de persistance ou simplement de modifier la classe `SqlBookRepository`, on risque de devoir adapter le code appelant (`BookService` en l'occurrence) en fonction alors que son rôle est d'encapsuler des règles applicatives.
+
+Pour casser la dépendance au `SqlBookRepository`, on peut créer une interface`BookRepository` avec une méthode `findAll` sur laquelle le `SqlBookRepository` viendra se brancher. De cette manière, nos deux classes `SqlBookRepository` et `BookService` dépendent maintenant de cette interface.
 
 ### Loi de Demeter
 
